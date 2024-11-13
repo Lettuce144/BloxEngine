@@ -86,6 +86,9 @@ if (NOT EnTT_FOUND)
     FetchContent_MakeAvailable(EnTT)
 endif()
 
+# ImGui
+add_subdirectory(src/Thirdparty/)
+
 # ------------------------------------------------------- END Dependencies
 
 add_subdirectory(src/Engine)
@@ -99,7 +102,7 @@ include(CPack)
 
 # Note that PUBLIC means that the library will be linked to the target and other targets automatically 
 # get the library linked to them as well. PRIVATE means that only the target will be linked to the library.
-target_link_libraries(BloxEngine PUBLIC raylib raylib_cpp)
+target_link_libraries(BloxEngine PUBLIC raylib raylib_cpp imgui_glfw)
 target_link_libraries(BloxEngine PUBLIC EnTT::EnTT)
 
 target_link_libraries(BloxEngineDemo PRIVATE BloxEngine)
