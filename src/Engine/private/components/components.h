@@ -11,11 +11,17 @@
 * Mostly just wrappers around Raylib features.
 
 * TODO: Make a seperate components file for BloxEngine features.
+* TODO: Use raylib instead of raylib-cpp !!!!!!!
 */
+
+class BaseEntity;
+
+#include "scene.h"
 
 namespace BloxEngine
 {
 
+    // A position, rotation and scale component
     struct TransformComponent
     {
         Transform transform = {Vector3{0.0f, 0.0f, 0.0f}, Quaternion{0.0f, 0.0f, 0.0f, 1.0f}, Vector3{1.0f, 1.0f, 1.0f}};
@@ -32,6 +38,7 @@ namespace BloxEngine
         TransformComponent &operator=(const TransformComponent &) = delete;
     };
 
+    // Gives an entity a name, default and required!
     struct TagComponent
     {
         std::string Tag;
@@ -44,22 +51,49 @@ namespace BloxEngine
         TagComponent &operator=(const TagComponent &) = delete;
     };
 
+    // TODO: Probably gonna remove this later since using it is a bit redundant
+    struct ModelMaterialComponent
+    {
+        raylib::Texture2D AlbedoMap;
+        raylib::Texture2D NormalMap;
+        raylib::Texture2D MetalnessMap;
+        raylib::Texture2D RoughnessMap;
+        raylib::Texture2D OcclusionMap;
+
+        std::array<Texture2D, 5> MaterialMaps = {AlbedoMap, NormalMap, MetalnessMap, RoughnessMap, OcclusionMap};
+
+        // @param entity The entity to set the material for
+        // @param materialMapIndex Type of material
+        // @param texture The texture to set
+        void SetMaterial(BaseEntity& entity, const MaterialMapIndex &materialMapIndex, const Texture2D &texture);
+
+        ModelMaterialComponent() = default;
+        ModelMaterialComponent(const ModelMaterialComponent &) = default;
+        ModelMaterialComponent(const Texture2D &albedoMap, const Texture2D &normalMap, const Texture2D &metalnessMap, const Texture2D &roughnessMap, const Texture2D &occlusionMap)
+            : AlbedoMap(albedoMap), NormalMap(normalMap), MetalnessMap(metalnessMap), RoughnessMap(roughnessMap), OcclusionMap(occlusionMap)
+        {
+        }
+
+        // Delete the copy assignment operator
+        ModelMaterialComponent &operator=(const ModelMaterialComponent &) = delete;
+    };
+
     struct ModelComponent
     {
+        // BUG: Using raylib::Model in the constructer causes a segfault when the destructor is called
+        // SOLUTION: Use Model instead of the cpp wrapper raylib::Model, alternatively use a shared_ptr here
+        // TODO: Use a shared_ptr?
         raylib::Model ModelObject;
-
-        // Todo make this a material component
-        raylib::Texture2D AlbedoMap;
-        /*
-        raylib::Texture2D NormalMap;
-        raylib::Texture2D SpecularMap;
-        raylib::Texture2D EmissionMap;
-        */
+        // raylib::Texture2D AlbedoMap;
 
         ModelComponent() = default;
         ModelComponent(const ModelComponent &) = default;
         ModelComponent(const Model &model) : ModelObject(model) {}
-        ModelComponent(const Model &model, const Texture2D &material) : ModelObject(model), AlbedoMap(material) {}
+
+        // Implicit conversion to Model (raylib)
+        operator Model() const { return ModelObject; }
+
+        ModelComponent &operator=(const ModelComponent &) = delete;
     };
 
     // NOTE: This is a wrapper around the raylib Model class

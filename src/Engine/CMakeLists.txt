@@ -2,6 +2,7 @@ add_library(BloxEngine STATIC
   gameinstance.cpp
   scene.cpp
   baseentity.cpp
+  components.cpp
   # add more cpp files to compile!
   # ej. game.cpp
 )
