@@ -3,8 +3,7 @@
 int main()
 {
     // TODO: Check if this should be allocated on the heap
-    GameInstance* game = new GameInstance(800, 450, "Game"); 
-    // game.draw(); TODO: Implement this function
+    GameInstance* game = new GameInstance(1360, 768, "Blox Engine Editor");
 
     delete game;
 

@@ -3,13 +3,28 @@
 #include "components/components.h"
 #include "scene.h"
 
-#include "raylib-cpp.hpp"
+#include "EditorUI/EditorPanel.h"
+#include "EditorUI/EditorButton.h"
+
+#include "EditorUI/SceneHierarchyPanel.h"
+
+// libraries are always included through the angle brackets
+#include <imgui.h>
+#include <rlImGui.h>
+#include <raylib-cpp.hpp>
+
+#include <iostream>
+
+static void callbackTest()
+{
+  std::cout << "Pressed button!" << std::endl;
+}
 
 GameInstance::GameInstance(const int &width, const int &height, const char *title)
     : m_ptrActiveScene(std::make_shared<BloxEngine::Scene>())
 {
   // TODO: Move this to the game project
-  raylib::Window window(width, height, title);
+  raylib::Window window(width, height, title, FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
   // raylib::Color textColor = raylib::Color::LightGray();
 
   raylib::Camera3D camera(raylib::Vector3{0.0f, 10.0f, 10.0f},
@@ -18,7 +33,33 @@ GameInstance::GameInstance(const int &width, const int &height, const char *titl
                           45.0f, CameraProjection::CAMERA_PERSPECTIVE);
 
   window.SetTargetFPS(60);
-  // DisableCursor();
+
+  // --------------------------------------------------
+  // Gui setup
+  // --------------------------------------------------
+
+  // Initialize rlImGui
+  rlImGuiBeginInitImGui();
+  {
+    ImGuiIO &io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;                         // Enable docking
+    io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f); // TODO: Fix loading fonts, currently look rugged and ugly
+  }
+  rlImGuiEndInitImGui();
+
+  DisableCursor(); // TODO: Fix this, it's not working
+
+  // Editor panel
+  BloxEngine::EditorUI::EditorPanel editorpanel;
+  editorpanel.AddElement(std::make_unique<BloxEngine::EditorUI::EditorButton>("Hello, world!", ImVec2(100, 50), callbackTest));
+
+  BloxEngine::EditorUI::SceneHierarchyPanel sceneHierarchyPanel(m_ptrActiveScene);
+
+  // raylib::RenderTexture2D texture(window.GetWidth(), window.GetHeight());
+
+  // --------------------------------------------------
+  // Game specific code
+  // --------------------------------------------------
 
   // Jeez only the standard Raylib api works without leaking memory, wtf?
   Model model = LoadModel("assets/radio.glb");
@@ -30,9 +71,12 @@ GameInstance::GameInstance(const int &width, const int &height, const char *titl
 
   auto block = m_ptrActiveScene->CreateEntity("Block");
   block.AddComponent<BloxEngine::ModelComponent>(LoadModel("assets/block.obj"));
-
   // Set the material for the block
   block.AddComponent<BloxEngine::ModelMaterialComponent>().SetMaterial(block, MATERIAL_MAP_DIFFUSE, albedoModel);
+
+  // --------------------------------------------------
+  // Raylib game loop
+  // --------------------------------------------------
 
   while (!window.ShouldClose())
   {
@@ -40,6 +84,14 @@ GameInstance::GameInstance(const int &width, const int &height, const char *titl
     window.BeginDrawing();
     {
       window.ClearBackground(raylib::Color::FromHSV(34, 180, 30));
+
+      rlImGuiBegin();
+      ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
+
+      sceneHierarchyPanel.Draw();
+      editorpanel.Draw();
+
+      ImGui::ShowDemoWindow();
       // textColor.DrawText("Congrats! You created your first window!", 190, 200, 20);
 
       camera.BeginMode();
@@ -49,7 +101,11 @@ GameInstance::GameInstance(const int &width, const int &height, const char *titl
         DrawPlane(raylib::Vector3{0.0f, 0.0f, 0.0f}, raylib::Vector2{32.0f, 32.0f}, GRAY);
       }
       camera.EndMode();
+
+      rlImGuiEnd();
     }
     window.EndDrawing();
   }
+
+  rlImGuiShutdown();
 }

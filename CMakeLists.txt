@@ -75,6 +75,7 @@ if (NOT raylib_cpp_FOUND)
     FetchContent_MakeAvailable(raylib_cpp)
 endif()
 
+# EnTT
 find_package(EnTT QUIET)
 if (NOT EnTT_FOUND)
     include(FetchContent)
@@ -102,14 +103,13 @@ include(CPack)
 
 # Note that PUBLIC means that the library will be linked to the target and other targets automatically 
 # get the library linked to them as well. PRIVATE means that only the target will be linked to the library.
-target_link_libraries(BloxEngine PUBLIC raylib raylib_cpp imgui_glfw)
+target_link_libraries(BloxEngine PUBLIC raylib raylib_cpp imgui_raylib)
 target_link_libraries(BloxEngine PUBLIC EnTT::EnTT)
-
 target_link_libraries(BloxEngineDemo PRIVATE BloxEngine)
 
-target_include_directories(BloxEngine PUBLIC Ent)
 
 # Include directories
+target_include_directories(BloxEngine PUBLIC Ent)
 target_include_directories(BloxEngineDemo PUBLIC "Engine/public")
 
 # ------------------------------------------------------- END Link libraries here
