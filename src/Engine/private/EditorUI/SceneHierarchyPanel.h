@@ -4,6 +4,7 @@
 
 #include "EditorUI/EditorPanel.h"
 #include "scene.h"
+#include "baseentity.hpp"
 
 #include <entt/entt.hpp>
 
@@ -17,14 +18,29 @@ namespace BloxEngine::EditorUI
         ~SceneHierarchyPanel() {};
 
         void Draw() override;
-        void SetSelectedEntity(entt::entity& entity);
+        void SetSelectedEntity(entt::entity &entity);
 
+        BaseEntity GetSelectedEntity() const { m_selectedEntity; }
+        // Private methods
+    private:
+        template <typename T>
+        void DrawAddComponentEntry(const std::string &entryName);
+        
+        template <typename T>
+        // Draw a component's info in a child window
+        void DrawComponentInfo(std::function<void(T &)> drawFunction, const std::string &componentName);
+        
+
+        void DrawComponents(BaseEntity &entity);
     private:
         // Pointer to scene to display a list of its entities
         std::shared_ptr<Scene> m_ptrScenePanel;
 
-        // TODO: Implement selection of entities
-        entt::entity m_selectedEntity;
+        BaseEntity m_selectedEntity = BaseEntity(entt::null, m_ptrScenePanel);
+
+        // State to track the entity being renamed
+        entt::entity entityBeingRenamed = entt::null;
+        char renameBuffer[256] = "";
     };
 
 } // namespace BloxEngine

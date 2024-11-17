@@ -20,7 +20,6 @@ class BaseEntity;
 
 namespace BloxEngine
 {
-
     // A position, rotation and scale component
     struct TransformComponent
     {
@@ -65,7 +64,7 @@ namespace BloxEngine
         // @param entity The entity to set the material for
         // @param materialMapIndex Type of material
         // @param texture The texture to set
-        void SetMaterial(BaseEntity& entity, const MaterialMapIndex &materialMapIndex, const Texture2D &texture);
+        void SetMaterial(BaseEntity &entity, const MaterialMapIndex &materialMapIndex, const Texture2D &texture);
 
         ModelMaterialComponent() = default;
         ModelMaterialComponent(const ModelMaterialComponent &) = default;
@@ -90,29 +89,44 @@ namespace BloxEngine
         ModelComponent(const ModelComponent &) = default;
         ModelComponent(const Model &model) : ModelObject(model) {}
 
+        void setModel(const std::string &modelPath)
+        {
+            ModelObject.Load(modelPath.c_str());
+        }
+
+        void setModel(const Model &model)
+        {
+            ModelObject = model;
+        }
+
         // Implicit conversion to Model (raylib)
         operator Model() const { return ModelObject; }
 
         ModelComponent &operator=(const ModelComponent &) = delete;
     };
 
-    // NOTE: This is a wrapper around the raylib Model class
-    // TODO: Change this to a Model
-    // struct MeshComponent
-    // {
-    //     raylib::Mesh MeshObject;
-    //     Material MeshMaterial;
+    struct TerrainComponent
+    {
+        raylib::Mesh TerrainMesh;
+        raylib::Material TerrainMaterial;
 
-    //     MeshComponent() = default;
-    //     MeshComponent(const MeshComponent &) = default;
-    //     MeshComponent(const Mesh &mesh, const Material& material) : MeshObject(mesh), MeshMaterial(material) {}
+        // Look into this!
+        // GenImageWhiteNoise
+        // GenImagePerlinNoise
 
-    //     // Implicit conversion to Transform (raylib)
-    //     operator Mesh() const { return MeshObject; }
+        TerrainComponent() = default;
+        TerrainComponent(const TerrainComponent &) = default;
+        TerrainComponent(const Mesh &mesh, const Material &texture) : TerrainMesh(mesh), TerrainMaterial(texture)
+        {
+            TerrainMesh = GenMeshPlane(1.0f, 1.0f, 10, 10);
+        }
 
-    //     // Delete the copy assignment operator
-    //     MeshComponent& operator=(const MeshComponent&) = delete;
-    // };
+        // Implicit conversion to Mesh (raylib)
+        operator Mesh() const { return TerrainMesh; }
+
+        // Delete the copy assignment operator
+        TerrainComponent &operator=(const TerrainComponent &) = delete;
+    };
 }
 
 #endif // COMPONENTS_H

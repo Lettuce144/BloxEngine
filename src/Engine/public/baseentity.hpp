@@ -32,7 +32,7 @@ namespace BloxEngine
         }
 
         template <typename T>
-        T &GetComponent()
+        T &GetComponent() const
         {
             // Get a component from the registry
             return m_Scene->m_Registry.get<T>(m_EntityHandle);
@@ -51,7 +51,7 @@ namespace BloxEngine
             m_Scene->m_Registry.remove<T>(m_EntityHandle);
         }
 
-        const std::string &GetName() { return GetComponent<TagComponent>().Tag; }
+        const std::string &GetName() const { return GetComponent<TagComponent>().Tag; }
 
         operator bool() const { return m_EntityHandle != entt::null; }
         operator entt::entity() const { return m_EntityHandle; }

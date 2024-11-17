@@ -47,11 +47,20 @@ namespace BloxEngine
 
             // TODO: Rewrite TransformComponent
             // Yuck, this is ugly
-            Vector3 &rotation = transform.translation;
+            Vector3 rotation;
             float angle;
             QuaternionToAxisAngle(transform.rotation, &rotation, &angle);
 
             model.ModelObject.Draw(transform.translation, rotation, angle, transform.scale);
         }
+
+        // TODO: Render terrain
+        // for (entt::entity entity : m_Registry.view<TransformComponent, TerrainComponent>())
+        // {
+        //     auto &transform = m_Registry.get<TransformComponent>(entity).transform;
+        //     auto &terrain = m_Registry.get<TerrainComponent>(entity);
+
+        //     terrain.TerrainMesh.Draw(terrain.TerrainMaterial, MatrixAdd);
+        // }
     }
 }

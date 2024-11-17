@@ -4,6 +4,7 @@ add_library(BloxEngine STATIC
   baseentity.cpp
   components.cpp
   EditorUI/EditorPanel.cpp
+  EditorUI/EditorViewportPanel.cpp
   EditorUI/SceneHierarchyPanel.cpp
   # add more cpp files to compile!
   # ej. game.cpp

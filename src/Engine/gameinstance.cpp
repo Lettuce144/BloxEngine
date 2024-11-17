@@ -7,6 +7,7 @@
 #include "EditorUI/EditorButton.h"
 
 #include "EditorUI/SceneHierarchyPanel.h"
+#include "EditorUI/EditorViewportPanel.h"
 
 // libraries are always included through the angle brackets
 #include <imgui.h>
@@ -55,6 +56,9 @@ GameInstance::GameInstance(const int &width, const int &height, const char *titl
 
   BloxEngine::EditorUI::SceneHierarchyPanel sceneHierarchyPanel(m_ptrActiveScene);
 
+  // Editor viewport panel
+  BloxEngine::EditorUI::EditorViewportPanel viewportpanel(camera, m_ptrActiveScene);
+
   // raylib::RenderTexture2D texture(window.GetWidth(), window.GetHeight());
 
   // --------------------------------------------------
@@ -67,7 +71,6 @@ GameInstance::GameInstance(const int &width, const int &height, const char *titl
 
   auto entity = m_ptrActiveScene->CreateEntity("Example radio model");
   entity.AddComponent<BloxEngine::ModelComponent>(model);
-  entity.AddComponent<BloxEngine::ModelMaterialComponent>().SetMaterial(entity, MATERIAL_MAP_DIFFUSE, albedoModel);
 
   auto block = m_ptrActiveScene->CreateEntity("Block");
   block.AddComponent<BloxEngine::ModelComponent>(LoadModel("assets/block.obj"));
@@ -90,22 +93,16 @@ GameInstance::GameInstance(const int &width, const int &height, const char *titl
 
       sceneHierarchyPanel.Draw();
       editorpanel.Draw();
+      viewportpanel.Draw();
 
       ImGui::ShowDemoWindow();
-      // textColor.DrawText("Congrats! You created your first window!", 190, 200, 20);
 
-      camera.BeginMode();
-      {
-        m_ptrActiveScene->OnUpdate();
-
-        DrawPlane(raylib::Vector3{0.0f, 0.0f, 0.0f}, raylib::Vector2{32.0f, 32.0f}, GRAY);
-      }
-      camera.EndMode();
+      viewportpanel.UpdateViewport();
 
       rlImGuiEnd();
     }
     window.EndDrawing();
   }
-
+  // viewportpanel.~viewportpanel();
   rlImGuiShutdown();
 }
