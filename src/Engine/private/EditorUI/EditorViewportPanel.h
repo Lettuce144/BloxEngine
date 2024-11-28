@@ -26,6 +26,8 @@ namespace BloxEngine::EditorUI
         void Draw() override;
         void UpdateViewport();
 
+        bool IsFocused() const { return m_Focused; }
+
     private:
         bool m_Focused = false;
 

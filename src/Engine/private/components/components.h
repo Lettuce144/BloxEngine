@@ -91,6 +91,7 @@ namespace BloxEngine
 
         void setModel(const std::string &modelPath)
         {
+            ModelObject.Unload();
             ModelObject.Load(modelPath.c_str());
         }
 

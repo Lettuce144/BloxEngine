@@ -10,6 +10,9 @@ namespace BloxEngine::EditorUI
         {
             m_Focused = ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows);
 
+            if (IsKeyPressed(KEY_ESCAPE))
+                m_Focused = false;
+
             ImVec2 panelSize = ImGui::GetContentRegionAvail();
             if (panelSize.x != m_renderTexture.texture.width || panelSize.y != m_renderTexture.texture.height)
             {

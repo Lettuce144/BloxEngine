@@ -53,9 +53,7 @@ namespace BloxEngine::EditorUI
         }
 
         DrawComponentInfo<TagComponent>([](TagComponent &tag)
-        { 
-            ImGui::Text("Tag: %s", tag.Tag.c_str());
-        }, "Tag");
+                                        { ImGui::Text("Tag: %s", tag.Tag.c_str()); }, "Tag");
 
         DrawComponentInfo<TransformComponent>([](TransformComponent &transform)
         {
@@ -63,14 +61,24 @@ namespace BloxEngine::EditorUI
             ImGui::DragFloat3("Rotation", &transform.transform.rotation.x, 0.1f);
             ImGui::DragFloat3("Scale", &transform.transform.scale.x, 0.1f); 
         }, "Transform");
-        
-        DrawComponentInfo<ModelComponent>([&entity](ModelComponent &model)
-        {
-            ImGui::Text("Meshes: %i", model.ModelObject.meshCount);
-            // TODO: Make a load button
-            // TODO: make it say which model is loaded
-            // TODO: FOR THE LOVE OF GOD, REMOVE MODELMATERIALCOMPONENT
 
+        DrawComponentInfo<ModelComponent>([&entity](ModelComponent &model)
+                                          {
+            ImGui::Text("Meshes: %i", model.ModelObject.meshCount);
+            // TODO: Implement a load button here to load a new model.
+            // The button should be placed above the "Meshes" text and should open a file dialog to select a model file.
+            // Once a model is selected, it should be loaded and assigned to the ModelComponent.
+
+            // TODO: make it say which model is loaded
+            if (ImGui::CollapsingHeader("Model"))
+            {
+                if (ImGui::Button("Load model"))
+                {
+                    printf("Load model button pressed\n");
+                }
+            }
+
+            // TODO: FOR THE LOVE OF GOD, REMOVE MODELMATERIALCOMPONENT
             if(entity.HasComponent<ModelMaterialComponent>())
             {
                 if (ImGui::CollapsingHeader("Albedo"))
@@ -97,8 +105,7 @@ namespace BloxEngine::EditorUI
                 {
                     rlImGuiImage(&model.ModelObject.materials[0].maps[MATERIAL_MAP_OCCLUSION].texture);
                 }
-            }
-        }, "Model");
+            } }, "Model");
     }
 
     void SceneHierarchyPanel::Draw()
@@ -110,24 +117,27 @@ namespace BloxEngine::EditorUI
             auto &tag = m_ptrScenePanel->m_Registry.get<TagComponent>(entity);
 
             // If this entity is being renamed
-            // TODO: Fix crash when renaming an empty string
             if (entityBeingRenamed == entity)
             {
                 if (ImGui::InputText("##RenameEntity", renameBuffer, sizeof(renameBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
                 {
-                    // Commit the rename when the user presses Enter
-                    tag.Tag = renameBuffer;
+                    // Commit the rename when the user presses Enter, only if the buffer is not empty
+                    if (strlen(renameBuffer) > 0)
+                    {
+                        tag.Tag = renameBuffer;
+                    }
                     entityBeingRenamed = entt::null; // Clear rename state
                 }
 
                 // Stop renaming if user clicks outside or presses escape
-                if (!ImGui::IsItemActive() && !ImGui::IsMouseHoveringRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax()))
+                if (!ImGui::IsItemActive() && (!ImGui::IsMouseHoveringRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax()) || ImGui::IsKeyPressed(ImGuiKey_Escape)))
                 {
                     entityBeingRenamed = entt::null;
                 }
             }
             else
             {
+                // TODO: Implement a id system for entities
                 // Display the tag normally
                 if (ImGui::Selectable(tag.Tag.c_str(), m_selectedEntity == entity))
                 {
@@ -138,7 +148,7 @@ namespace BloxEngine::EditorUI
                 if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
                 {
                     entityBeingRenamed = entity;
-                    strncpy(renameBuffer, tag.Tag.c_str(), sizeof(renameBuffer) - 1);
+                    strncpy(renameBuffer, tag.Tag.c_str(), sizeof(renameBuffer));
                     renameBuffer[sizeof(renameBuffer) - 1] = '\0'; // Ensure null-termination
                 }
             }
@@ -157,15 +167,15 @@ namespace BloxEngine::EditorUI
 
                 ImGui::EndPopup();
             }
-
-            if(ImGui::BeginPopupContextWindow())
+        }
+        
+        if (ImGui::BeginPopupContextWindow())
+        {
+            if (ImGui::MenuItem("Create Entity"))
             {
-                if(ImGui::MenuItem("Create Entity"))
-                {
-                    m_ptrScenePanel->CreateEntity("Entity");
-                }
-                ImGui::EndPopup();
+                m_ptrScenePanel->CreateEntity("Entity");
             }
+            ImGui::EndPopup();
         }
         ImGui::End();
 

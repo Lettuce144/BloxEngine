@@ -5,7 +5,6 @@ namespace BloxEngine::EditorUI
     EditorPanel::EditorPanel()
     {
         m_panelName = "Editor Panel";
-
     }
 
     EditorPanel::~EditorPanel()
