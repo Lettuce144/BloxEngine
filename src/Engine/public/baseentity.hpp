@@ -16,7 +16,7 @@ namespace BloxEngine
 {
     // Base entity class, wrapper for getting the entity from the registry.
     // All of the entity's components are stored in the registry which is stored in scene
-    // so talking to the scene directly for interacting with entities from a user perspective doensn't make sense
+    // Now talking to the scene directly for interacting with entities from a user perspective doensn't make sense
     // So we have this class to handle that
     class BaseEntity
     {

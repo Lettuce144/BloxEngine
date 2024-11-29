@@ -37,6 +37,7 @@ namespace BloxEngine
     // TODO: void Scene::RenderScene(EditorCamera& camera) for rendering the scene in the editor
     //       Basically seperate loop method, one for the editor and one for the game
 
+    // TODO: This would be where the actual rendering of the scene would happen, for instance when actually playing the game
     void Scene::OnUpdate()
     {
         // Render 3D objects that have a transform and model component
