@@ -25,17 +25,9 @@ namespace BloxEngine::EditorUI
         ImGui::End();
     }
 
+    // TODO: Abstract this to a SceneRenderer class
     void EditorViewportPanel::UpdateViewport()
     {
-        // Resize render texture if necessary
-        // int newWidth = GetScreenWidth();
-        // int newHeight = GetScreenHeight();
-        // if (newWidth != m_renderTexture.texture.width || newHeight != m_renderTexture.texture.height)
-        // {
-        //     UnloadRenderTexture(m_renderTexture);
-        //     m_renderTexture = LoadRenderTexture(newWidth, newHeight);
-        // }
-
         BeginTextureMode(m_renderTexture);
         {
             ClearBackground(SKYBLUE);

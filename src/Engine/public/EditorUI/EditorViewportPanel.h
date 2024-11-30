@@ -17,6 +17,7 @@ namespace BloxEngine::EditorUI
         {
             m_renderTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
         };
+        
         ~EditorViewportPanel() 
         {
             UnloadRenderTexture(m_renderTexture);

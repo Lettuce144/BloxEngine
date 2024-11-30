@@ -93,7 +93,7 @@ add_subdirectory(src/Thirdparty/)
 # ------------------------------------------------------- END Dependencies
 
 add_subdirectory(src/Engine)
-add_subdirectory(src/GameDemo)
+add_subdirectory(src/Editor)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
@@ -105,11 +105,11 @@ include(CPack)
 # get the library linked to them as well. PRIVATE means that only the target will be linked to the library.
 target_link_libraries(BloxEngine PUBLIC raylib raylib_cpp imgui_raylib)
 target_link_libraries(BloxEngine PUBLIC EnTT::EnTT)
-target_link_libraries(BloxEngineDemo PRIVATE BloxEngine)
+target_link_libraries(BloxEngineEditor PRIVATE BloxEngine)
 
 
 # Include directories
 target_include_directories(BloxEngine PUBLIC Ent)
-target_include_directories(BloxEngineDemo PUBLIC "Engine/public")
+target_include_directories(BloxEngineEditor PUBLIC "Engine/public")
 
 # ------------------------------------------------------- END Link libraries here
