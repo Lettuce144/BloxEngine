@@ -16,7 +16,7 @@ namespace BloxEngine::EditorUI
     public:
         // Constructor and destructor
         EditorPanel();
-        ~EditorPanel();
+        virtual ~EditorPanel();
 
         virtual void Draw();
 

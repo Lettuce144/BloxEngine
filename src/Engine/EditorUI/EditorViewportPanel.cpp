@@ -8,10 +8,20 @@ namespace BloxEngine::EditorUI
     {
         if (ImGui::Begin("3D View", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
         {
-            m_Focused = ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows);
+            // if(m_Focused != false && IsKeyPressed(KEY_ESCAPE))
+            // {
+            //     m_Focused = false;
+            //     ImGui::SetWindowFocus(nullptr);
+            // }
+            // else
+            // {
+            //     m_Focused = true;
+            // }
 
-            if (IsKeyPressed(KEY_ESCAPE))
-                m_Focused = false;
+            if(IsKeyPressed(KEY_ESCAPE))
+            {
+                m_Focused = !m_Focused;
+            }
 
             ImVec2 panelSize = ImGui::GetContentRegionAvail();
             if (panelSize.x != m_renderTexture.texture.width || panelSize.y != m_renderTexture.texture.height)

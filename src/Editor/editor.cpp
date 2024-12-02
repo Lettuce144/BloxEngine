@@ -1,7 +1,7 @@
 #include <Application/entrypoint.hpp>
 #include <Application/gameinstance.h>
 
-// #include <Application/instanceprops.h>
+#include <Application/instanceprops.h>
 
 #include <EditorUI/EditorViewportPanel.h>
 #include <EditorUI/SceneHierarchyPanel.h>
@@ -17,8 +17,8 @@
 class Editor : public BloxEngine::GameInstance
 {
 public:
-    Editor(const int &width, const int &height, const char *title)
-        : BloxEngine::GameInstance(width, height, title)
+    Editor(const BloxEngine::InstanceProperties &props)
+        : BloxEngine::GameInstance(props)
     {
     }
 
@@ -39,7 +39,15 @@ private:
 
 BloxEngine::GameInstance *BloxEngine::CreateGameInstance()
 {
-    return new Editor(1360, 768, "Blox Engine Editor");
+    InstanceProperties applicationProperties;
+
+    applicationProperties.appName = "Blox Engine Editor";
+    applicationProperties.width = 1360; // Default width
+    applicationProperties.height = 768; // Default height
+    applicationProperties.fullscreen = false;
+    applicationProperties.clearcolor = RAYWHITE;
+    
+    return new Editor(applicationProperties);
 }
 
 void Editor::OnAttach()
@@ -78,6 +86,11 @@ void Editor::OnUpdate()
     if (m_viewportPanel->IsFocused())
     {
         m_editorCamera.Update(CAMERA_FREE);
+        DisableCursor();
+    }
+    else
+    {
+        ShowCursor();
     }
 
     GetInstanceWindow()->BeginDrawing();

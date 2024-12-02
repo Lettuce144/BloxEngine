@@ -16,6 +16,8 @@ namespace BloxEngine::EditorUI
         EditorViewportPanel(Camera3D& camera, std::shared_ptr<Scene> activeScene) : m_refCamera(camera), m_ptrActiveScene(activeScene)
         {
             m_renderTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+            
+            m_Focused = ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows);
         };
         
         ~EditorViewportPanel() 
@@ -30,7 +32,7 @@ namespace BloxEngine::EditorUI
         bool IsFocused() const { return m_Focused; }
 
     private:
-        bool m_Focused = false;
+        bool m_Focused;
 
         Camera3D& m_refCamera;
         std::shared_ptr<Scene> m_ptrActiveScene;

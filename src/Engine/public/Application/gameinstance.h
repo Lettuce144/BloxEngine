@@ -5,6 +5,7 @@
 #include "scene.h"
 #include <memory>
 
+#include <Application/instanceprops.h>
 #include <raylib-cpp.hpp>
 
 namespace BloxEngine
@@ -15,13 +16,13 @@ namespace BloxEngine
     public:
         // TODO: Change the parameters to a struct.
         // title is a char for compatibility reasons with raylib
-        GameInstance(const int &width, const int &height, const char *title);
+        GameInstance(const InstanceProperties &props);
         virtual ~GameInstance() = default;
 
         // This runs the game loop
         void Run();
 
-        // Is called every frame when the game is running
+        // Is called every frame when the instance window is open
         virtual void OnUpdate() = 0;
 
         // Called when the game instance is created

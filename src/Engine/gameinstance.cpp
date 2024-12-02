@@ -12,11 +12,11 @@
 
 namespace BloxEngine
 {
-  GameInstance::GameInstance(const int &width, const int &height, const char *title)
+  GameInstance::GameInstance(const InstanceProperties &props)
       : m_ptrActiveScene(std::make_shared<BloxEngine::Scene>())
   {
 
-    m_ptrWindow = std::make_unique<raylib::Window>(width, height, title, FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
+    m_ptrWindow = std::make_unique<raylib::Window>(props.width, props.height, props.appName, FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
     m_ptrWindow->SetTargetFPS(60);
 
     SetExitKey(KEY_NULL);
