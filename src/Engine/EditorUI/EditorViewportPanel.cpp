@@ -8,17 +8,7 @@ namespace BloxEngine::EditorUI
     {
         if (ImGui::Begin("3D View", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
         {
-            // if(m_Focused != false && IsKeyPressed(KEY_ESCAPE))
-            // {
-            //     m_Focused = false;
-            //     ImGui::SetWindowFocus(nullptr);
-            // }
-            // else
-            // {
-            //     m_Focused = true;
-            // }
-
-            if(IsKeyPressed(KEY_ESCAPE))
+            if(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows) && IsKeyPressed(KEY_ESCAPE))
             {
                 m_Focused = !m_Focused;
             }
