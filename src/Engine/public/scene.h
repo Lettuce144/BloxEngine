@@ -3,6 +3,8 @@
 #pragma once
 
 #include <entt/entt.hpp>
+#include <toml++/toml.hpp>
+#include <raylib.h>
 
 namespace BloxEngine
 {
@@ -21,16 +23,33 @@ namespace BloxEngine
 		Scene();
 		~Scene();
 
-		void OnUpdate();
+		void RenderEditorScene(Camera3D &currentCamera);
 
 		BaseEntity CreateEntity(const std::string &name);
 		void DestroyEntity(BaseEntity entity);
 
 	private:
 		entt::registry m_Registry;
-		
+		Texture2D m_LightIcon;
+		Texture2D m_SunIcon;
+
+		// TODO: When adding lua scripting, add a lua state here
+
 		friend class BaseEntity;
 		friend class EditorUI::SceneHierarchyPanel;
 	};
+
+	class SceneSerializer
+	{
+	public:
+		SceneSerializer(const std::shared_ptr<Scene> &scene);
+		~SceneSerializer();
+
+		void Serialize(const std::string &filepath);
+		void Deserialize(toml::table &parsedToml);
+
+	private:
+		std::shared_ptr<Scene> m_Scene;
+	};
 #endif /* SCENE_H */
-}
+};

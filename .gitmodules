@@ -2,3 +2,6 @@
 	path = src/Thirdparty/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "src/ThirdpartyLibs/vendor/vfspp"]
+	path = src/ThirdpartyLibs/vendor/vfspp
+	url = https://github.com/nextgeniuspro/vfspp.git

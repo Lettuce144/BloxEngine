@@ -1,115 +1,87 @@
 #include <Application/entrypoint.hpp>
-#include <Application/gameinstance.h>
-
-#include <Application/instanceprops.h>
-
-#include <EditorUI/EditorViewportPanel.h>
-#include <EditorUI/SceneHierarchyPanel.h>
-
-#include <memory>
-#include <raylib-cpp.hpp>
-
-#include <imgui.h>
-#include <rlImGui.h>
-
-// Normally you would create a game when inheriting from GameInstance
-// Making this technically a game, however that is how the engine is designed
-class Editor : public BloxEngine::GameInstance
-{
-public:
-    Editor(const BloxEngine::InstanceProperties &props)
-        : BloxEngine::GameInstance(props)
-    {
-    }
-
-    void OnUpdate() override;
-    void OnAttach() override;
-    void OnDetach() override;
-
-    ~Editor() = default;
-
-private:
-    // TODO: Use the editor camera class provided by the engine
-    raylib::Camera3D m_editorCamera;
-
-    // Panels
-    std::shared_ptr<BloxEngine::EditorUI::SceneHierarchyPanel> m_sceneHierarchyPanel;
-    std::shared_ptr<BloxEngine::EditorUI::EditorViewportPanel> m_viewportPanel;
-};
+#include "editor.hpp"
 
 BloxEngine::GameInstance *BloxEngine::CreateGameInstance()
 {
-    InstanceProperties applicationProperties;
+  InstanceProperties applicationProperties;
 
-    applicationProperties.appName = "Blox Engine Editor";
-    applicationProperties.width = 1360; // Default width
-    applicationProperties.height = 768; // Default height
-    applicationProperties.fullscreen = false;
-    applicationProperties.clearcolor = RAYWHITE;
-    
-    return new Editor(applicationProperties);
+  applicationProperties.appName = "Blox Engine Editor";
+  applicationProperties.width = 1360; // Default width
+  applicationProperties.height = 768; // Default height
+  applicationProperties.fullscreen = false;
+  applicationProperties.clearcolor = RAYWHITE;
+
+  return new Editor(applicationProperties);
 }
 
 void Editor::OnAttach()
 {
-    m_editorCamera = raylib::Camera3D(raylib::Vector3{0.0f, 10.0f, 10.0f},
-                                      raylib::Vector3{0.0f, 0.0f, 0.0f},
-                                      raylib::Vector3{0.0f, 1.0f, 0.0f},
-                                      45.0f, CameraProjection::CAMERA_PERSPECTIVE);
 
-    // --------------------------------------------------
-    // Gui setup
-    // --------------------------------------------------
+  // --------------------------------------------------
+  // Gui setup
+  // --------------------------------------------------
 
-    // Initialize rlImGui
-    rlImGuiBeginInitImGui();
-    {
-        ImGuiIO &io = ImGui::GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;                         // Enable docking
-        io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f); // TODO: Fix loading fonts, currently look rugged and ugly
-    }
-    rlImGuiEndInitImGui();
+  // Initialize rlImGui
+  rlImGuiBeginInitImGui();
+  {
+    ImGuiIO &io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable docking
+    io.Fonts->AddFontFromFileTTF(
+        "resources/fonts/Roboto-Medium.ttf",
+        16.0f); // TODO: Fix loading fonts, currently look rugged and ugly
+    imgui_green_theme();
+  }
+  rlImGuiEndInitImGui();
 
-    // Editor viewport panel
-    m_viewportPanel = std::make_shared<BloxEngine::EditorUI::EditorViewportPanel>(m_editorCamera, GetActiveScene());
-    m_sceneHierarchyPanel = std::make_shared<BloxEngine::EditorUI::SceneHierarchyPanel>(GetActiveScene());
+  // Initialize the editor camera first
+  m_editorCamera = BloxEngine::EditorCamera();
+
+  m_sceneHierarchyPanel =
+      std::make_shared<BloxEngine::EditorUI::SceneHierarchyPanel>(
+          GetActiveScene());
+
+  // Editor viewport panel
+  m_viewportPanel = std::make_shared<BloxEngine::EditorUI::EditorViewportPanel>(
+      m_editorCamera, this, m_sceneHierarchyPanel); // Pass SceneHierarchyPanel
+
+  // Set the viewport panel in the editor camera
+  m_editorCamera.SetViewportPanel(m_viewportPanel);
+
+  m_menuBar = std::make_unique<EditorMenuBar>(*this);
 }
 
-void Editor::OnDetach()
-{
-    rlImGuiShutdown();
-}
+void Editor::OnDetach() { rlImGuiShutdown(); }
 
 void Editor::OnUpdate()
 {
+  GetInstanceWindow()->BeginDrawing();
+  {
+    GetInstanceWindow()->ClearBackground(BLANK); // TODO: Make this a setting
+
+    rlImGuiBegin();
+    ImGuizmo::BeginFrame();
+    
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+    ImGui::DockSpaceOverViewport(0, NULL,
+                                 ImGuiDockNodeFlags_PassthruCentralNode);
+
+    // Draw the viewport panel
+    m_viewportPanel->UpdateViewport();
+
+    // Update the viewport
+    m_viewportPanel->Draw();
+
+    // Draw the scene hierarchy panel
+    m_sceneHierarchyPanel->Draw();
+
+    // Draw the menu bar
+    m_menuBar->DrawElement();
+
     // Update the camera
-    if (m_viewportPanel->IsFocused())
-    {
-        m_editorCamera.Update(CAMERA_FREE);
-        DisableCursor();
-    }
-    else
-    {
-        ShowCursor();
-    }
+    m_editorCamera.DrawCamera();
 
-    GetInstanceWindow()->BeginDrawing();
-    {
-        rlImGuiBegin();
-        ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-        ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
-
-        // Draw the scene hierarchy panel
-        m_sceneHierarchyPanel->Draw();
-
-        // Draw the viewport panel
-        m_viewportPanel->Draw();
-
-        // Update the viewport
-        m_viewportPanel->UpdateViewport();
-
-        ImGui::PopFont();
-        rlImGuiEnd();
-    }
-    GetInstanceWindow()->EndDrawing();
+    ImGui::PopFont();
+    rlImGuiEnd();
+  }
+  GetInstanceWindow()->EndDrawing();
 }

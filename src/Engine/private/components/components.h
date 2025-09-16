@@ -1,7 +1,7 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
-#include <entt/entt.hpp>
+// #include <entt/entt.hpp>
 #include "raylib-cpp.hpp"
 
 /*
@@ -23,15 +23,47 @@ namespace BloxEngine
     // A position, rotation and scale component
     struct TransformComponent
     {
-        Transform transform = {Vector3{0.0f, 0.0f, 0.0f}, Quaternion{0.0f, 0.0f, 0.0f, 1.0f}, Vector3{1.0f, 1.0f, 1.0f}};
+        Vector3 translation = {0.0f, 0.0f, 0.0f};
+        Vector3 rotation = {0.0f, 0.0f, 0.0f}; // Euler angles in degrees
+        Vector3 scale = {1.0f, 1.0f, 1.0f};
 
         TransformComponent() = default;
         TransformComponent(const TransformComponent &) = default;
-        TransformComponent(const Vector3 &translation, const Quaternion &rotation, const Vector3 &scale)
-            : transform{translation, rotation, scale} {}
+        TransformComponent(const Vector3 &translation, const Vector3 &rotation, const Vector3 &scale)
+            : translation(translation), rotation(rotation), scale(scale) {}
 
-        // Implicit conversion to Transform (raylib)
-        operator Transform() const { return transform; }
+        // TODO: Move this to a utility file or class
+        //  Utility function to convert Euler (in degrees) to axis-angle
+        void EulerToAxisAngle(const Vector3 &eulerDegrees, Vector3 &outAxis, float &outAngle)
+        {
+            // Convert degrees to radians
+            Vector3 euler = Vector3Scale(eulerDegrees, DEG2RAD);
+
+            // Create quaternion from euler
+            Quaternion q = QuaternionFromEuler(euler.x, euler.y, euler.z);
+
+            // Normalize quaternion just in case
+            q = QuaternionNormalize(q);
+
+            // Convert to axis-angle
+            outAngle = 2.0f * acosf(q.w);
+
+            float sinHalfAngle = sqrtf(1.0f - q.w * q.w);
+            if (sinHalfAngle < 0.001f)
+            {
+                // If the angle is too small, set arbitrary axis
+                outAxis = {1.0f, 0.0f, 0.0f};
+            }
+            else
+            {
+                outAxis.x = q.x / sinHalfAngle;
+                outAxis.y = q.y / sinHalfAngle;
+                outAxis.z = q.z / sinHalfAngle;
+            }
+
+            // Convert angle from radians to degrees if needed by your renderer
+            outAngle *= RAD2DEG; // Only if your Draw expects degrees (Raylib uses radians, so skip this line if not needed)
+        }
 
         // Delete the copy assignment operator
         TransformComponent &operator=(const TransformComponent &) = delete;
@@ -67,7 +99,7 @@ namespace BloxEngine
         void SetMaterial(BaseEntity &entity, const MaterialMapIndex &materialMapIndex, const Texture2D &texture);
 
         ModelMaterialComponent() = default;
-        ModelMaterialComponent(const ModelMaterialComponent &) = default;
+        ModelMaterialComponent(const ModelMaterialComponent &) = delete;
         ModelMaterialComponent(const Texture2D &albedoMap, const Texture2D &normalMap, const Texture2D &metalnessMap, const Texture2D &roughnessMap, const Texture2D &occlusionMap)
             : AlbedoMap(albedoMap), NormalMap(normalMap), MetalnessMap(metalnessMap), RoughnessMap(roughnessMap), OcclusionMap(occlusionMap)
         {
@@ -86,15 +118,26 @@ namespace BloxEngine
         // raylib::Texture2D AlbedoMap;
 
         ModelComponent() = default;
-        ModelComponent(const ModelComponent &) = default;
+        ModelComponent(const ModelComponent &) = delete;
         ModelComponent(const Model &model) : ModelObject(model) {}
 
         void setModel(const std::string &modelPath)
         {
             ModelObject.Unload();
-            ModelObject.Load(modelPath.c_str());
+
+            // ModelObject.Load(modelPath.c_str()); // TODO: Catch errors
+            try
+            {
+                ModelObject.Load(modelPath.c_str());
+                // ModelObject = LoadModel(modelPath.c_str());
+            }
+            catch (const std::exception &e)
+            {
+                printf("Error loading model: %s\n", e.what());
+            }
         }
 
+        // @warning This overload doesn't unload the previous model!
         void setModel(const Model &model)
         {
             ModelObject = model;
@@ -116,7 +159,7 @@ namespace BloxEngine
         // GenImagePerlinNoise
 
         TerrainComponent() = default;
-        TerrainComponent(const TerrainComponent &) = default;
+        TerrainComponent(const TerrainComponent &) = delete;
         TerrainComponent(const Mesh &mesh, const Material &texture) : TerrainMesh(mesh), TerrainMaterial(texture)
         {
             TerrainMesh = GenMeshPlane(1.0f, 1.0f, 10, 10);
@@ -127,6 +170,33 @@ namespace BloxEngine
 
         // Delete the copy assignment operator
         TerrainComponent &operator=(const TerrainComponent &) = delete;
+    };
+
+    // Point light component
+    struct LightComponent
+    {
+
+        Color color = WHITE;
+        enum class LightType
+        {
+            Point,
+            Directional,
+
+        } type = LightType::Point;
+        Vector3 target = {0, 0, 0};
+
+        // Unused
+        // bool enabled;
+        // bool enableShadow;
+        // float shadowBias;
+        // float shadowIntensity;
+
+        LightComponent() = default;
+        LightComponent(const LightComponent &) = default;
+        LightComponent(const Color &col, LightType lightType = LightType::Point)
+            : type(lightType), color(col) {}
+
+        LightComponent &operator=(const LightComponent &) = default;
     };
 }
 

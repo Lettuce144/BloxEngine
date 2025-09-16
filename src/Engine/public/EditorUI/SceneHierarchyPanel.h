@@ -8,9 +8,9 @@
 
 #include <entt/entt.hpp>
 
+
 namespace BloxEngine::EditorUI
 {
-
     class SceneHierarchyPanel : public EditorPanel
     {
     public:
@@ -20,7 +20,7 @@ namespace BloxEngine::EditorUI
         void Draw() override;
         void SetSelectedEntity(entt::entity &entity);
 
-        BaseEntity GetSelectedEntity() const { m_selectedEntity; }
+        const BaseEntity& GetSelectedEntity() const { return m_selectedEntity; }
         // Private methods
     private:
         template <typename T>
@@ -30,12 +30,12 @@ namespace BloxEngine::EditorUI
         // Draw a component's info in a child window
         void DrawComponentInfo(std::function<void(T &)> drawFunction, const std::string &componentName);
         
-
         void DrawComponents(BaseEntity &entity);
     private:
         // Pointer to scene to display a list of its entities
         std::shared_ptr<Scene> m_ptrScenePanel;
 
+        // TODO: Use a pointer to the entity
         BaseEntity m_selectedEntity = BaseEntity(entt::null, m_ptrScenePanel);
 
         // State to track the entity being renamed

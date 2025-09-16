@@ -11,6 +11,16 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON) 
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# IMPORTANT: Set some variables to make sure the project is built correctly
+    # Raylib
+    set(GLFW_BUILD_WAYLAND ON CACHE BOOL "Use Wayland for GLFW")
+    set(GLFW_BUILD_X11 ON CACHE BOOL "Use X11 for GLFW")
+
+    # FIXME:
+    # This is a workaround for the fact a vendor from raylib-cpp does not support CMake 3.20+ yet
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
+
 # Let's nicely support folders in IDEs
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -54,7 +64,7 @@ if (NOT raylib_FOUND)
     FetchContent_Declare(
         raylib
         GIT_REPOSITORY https://github.com/raysan5/raylib.git
-        GIT_TAG 5.0
+        GIT_TAG 5.5
         GIT_SHALLOW 1
     )
     FetchContent_MakeAvailable(raylib)
@@ -64,7 +74,7 @@ endif()
 find_package(raylib_cpp QUIET)
 if (NOT raylib_cpp_FOUND)
     if (NOT DEFINED RAYLIB_CPP_VERSION)
-        set(RAYLIB_CPP_VERSION v5.0.2)
+        set(RAYLIB_CPP_VERSION v5.5.0)
     endif()
     include(FetchContent)
     FetchContent_Declare(
@@ -87,12 +97,47 @@ if (NOT EnTT_FOUND)
     FetchContent_MakeAvailable(EnTT)
 endif()
 
+find_package(tomlplusplus QUIET)
+if (NOT tomlplusplus_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        tomlplusplus
+        GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+        GIT_TAG        v3.4.0
+    )
+    FetchContent_MakeAvailable(tomlplusplus)
+endif()
+
+find_package(NativeFileDialog QUIET)
+if (NOT NativeFileDialog_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        NativeFileDialog
+        GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended.git
+        GIT_SHALLOW 1
+    )
+    FetchContent_MakeAvailable(NativeFileDialog)
+endif()
+
+find_package(vfspp QUIET)
+if (NOT vfspp)
+    include(FetchContent)
+    FetchContent_Declare(
+        vfspp
+        GIT_REPOSITORY https://github.com/Lettuce144/vfspp-fixed_miniz-cpp.git
+        GIT_SHALLOW 1
+    )
+    FetchContent_MakeAvailable(vfspp)
+endif()
+
 # ImGui
 add_subdirectory(src/Thirdparty/)
+
 
 # ------------------------------------------------------- END Dependencies
 
 add_subdirectory(src/Engine)
+
 add_subdirectory(src/Editor)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
@@ -103,13 +148,17 @@ include(CPack)
 
 # Note that PUBLIC means that the library will be linked to the target and other targets automatically 
 # get the library linked to them as well. PRIVATE means that only the target will be linked to the library.
-target_link_libraries(BloxEngine PUBLIC raylib raylib_cpp imgui_raylib)
+target_link_libraries(BloxEngine PUBLIC raylib raylib_cpp imgui_raylib nfd tomlplusplus::tomlplusplus)
 target_link_libraries(BloxEngine PUBLIC EnTT::EnTT)
+target_link_libraries(BloxEngine PUBLIC vfspp)
 target_link_libraries(BloxEngineEditor PRIVATE BloxEngine)
 
+add_compile_definitions(VFSPP_ENABLE_MULTITHREADING)
 
 # Include directories
 target_include_directories(BloxEngine PUBLIC Ent)
+target_include_directories(BloxEngine PUBLIC ${NativeFileDialog_SOURCE_DIR}/src/include)
 target_include_directories(BloxEngineEditor PUBLIC "Engine/public")
 
 # ------------------------------------------------------- END Link libraries here
+

@@ -1,3 +1,4 @@
+#include "Core/engine.h"
 #include "EditorUI/SceneHierarchyPanel.h"
 #include "components/components.h"
 
@@ -49,18 +50,42 @@ namespace BloxEngine::EditorUI
             DrawAddComponentEntry<ModelComponent>("Model");
             DrawAddComponentEntry<ModelMaterialComponent>("Model material");
             DrawAddComponentEntry<TerrainComponent>("Terrain");
+            DrawAddComponentEntry<LightComponent>("Light");
             ImGui::EndMenu();
         }
 
         DrawComponentInfo<TagComponent>([](TagComponent &tag)
-                                        { ImGui::Text("Tag: %s", tag.Tag.c_str()); }, "Tag");
+                                        { ImGui::Text("Tag: %s\n", tag.Tag.c_str()); }, "Tag");
 
         DrawComponentInfo<TransformComponent>([](TransformComponent &transform)
-        {
-            ImGui::DragFloat3("Translation", &transform.transform.translation.x, 0.1f);
-            ImGui::DragFloat3("Rotation", &transform.transform.rotation.x, 0.1f);
-            ImGui::DragFloat3("Scale", &transform.transform.scale.x, 0.1f); 
-        }, "Transform");
+                                              {
+            ImGui::DragFloat3("Translation", &transform.translation.x, 0.1f);
+            ImGui::DragFloat3("Rotation", &transform.rotation.x, 0.1f, -360.0f, 360.0f);
+            ImGui::DragFloat3("Scale", &transform.scale.x, 0.1f); }, "Transform");
+
+        DrawComponentInfo<LightComponent>([](LightComponent &light)
+                                          {
+            // Color picker for light color
+            float color[3] = {light.color.r / 255.0f, light.color.g / 255.0f, light.color.b / 255.0f};
+            if (ImGui::ColorEdit3("Color", color))
+            {
+                light.color.r = (unsigned char)(color[0] * 255.0f);
+                light.color.g = (unsigned char)(color[1] * 255.0f);
+                light.color.b = (unsigned char)(color[2] * 255.0f);
+            }
+            
+            if(ImGui::BeginCombo("Light type", light.type == LightComponent::LightType::Point ? "Point light" : "Directional light"))
+            {
+                if (ImGui::Selectable("Point Light"))
+                {
+                    light.type = LightComponent::LightType::Point;
+                }
+                if (ImGui::Selectable("Directional Light"))
+                {
+                    light.type = LightComponent::LightType::Directional;
+                }
+                ImGui::EndCombo();
+            } }, "Light");
 
         DrawComponentInfo<ModelComponent>([&entity](ModelComponent &model)
                                           {
@@ -74,11 +99,13 @@ namespace BloxEngine::EditorUI
             {
                 if (ImGui::Button("Load model"))
                 {
-                    printf("Load model button pressed\n");
+                    BloxEngine::Engine::OpenFile([&entity](const std::string &path) {
+                        entity.GetComponent<ModelComponent>().setModel(path.c_str());
+                    }, {{"Model Files", "obj,fbx,dae,glb,gltf"}}); // TODO: Add more file types with titles
                 }
             }
 
-            // TODO: FOR THE LOVE OF GOD, REMOVE MODELMATERIALCOMPONENT
+            // TODO: Loop over all materials and draw them
             if(entity.HasComponent<ModelMaterialComponent>())
             {
                 if (ImGui::CollapsingHeader("Albedo"))
@@ -152,31 +179,27 @@ namespace BloxEngine::EditorUI
                     renameBuffer[sizeof(renameBuffer) - 1] = '\0'; // Ensure null-termination
                 }
             }
-
-            // Right-click context menu
-            if (ImGui::BeginPopupContextItem())
-            {
-                if (ImGui::MenuItem("Delete"))
-                {
-                    m_ptrScenePanel->DestroyEntity(m_selectedEntity);
-                    if (m_selectedEntity == entity)
-                    {
-                        m_selectedEntity = BaseEntity(entt::null, m_ptrScenePanel);
-                    }
-                }
-
-                ImGui::EndPopup();
-            }
         }
-        
+
         if (ImGui::BeginPopupContextWindow())
         {
             if (ImGui::MenuItem("Create Entity"))
             {
                 m_ptrScenePanel->CreateEntity("Entity");
             }
+
+            if (ImGui::MenuItem("Delete"))
+            {
+                if (m_selectedEntity)
+                {
+                    m_ptrScenePanel->DestroyEntity(m_selectedEntity);
+                    m_selectedEntity = BaseEntity(entt::null, m_ptrScenePanel);
+                }
+            }
+
             ImGui::EndPopup();
         }
+
         ImGui::End();
 
         ImGui::Begin("Properties");

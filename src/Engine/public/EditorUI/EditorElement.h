@@ -4,11 +4,12 @@
 
 namespace BloxEngine::EditorUI
 {
-
     class EditorElement
     {
     public:
+        EditorElement() = default;
         virtual ~EditorElement() = default;
+        
         virtual void DrawElement() const = 0;
     };
 
