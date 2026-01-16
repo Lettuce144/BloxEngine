@@ -10,6 +10,8 @@
 void Draw3DBillboardRec(const Camera &camera, const Texture2D &texture, const Rectangle &source,
                         const Vector3 &position, const Vector2 &size, const Color &tint);
 
+#define MAX_LIGHTS 8
+
 namespace BloxEngine
 {
     class ForwardRenderer
@@ -42,6 +44,8 @@ namespace BloxEngine
     private:
         static void UpdateLightShader(int index, const Vector3 &position, const Vector3 &direction, const LightComponent &light);
         static void InitializeLitShaderLocations();
+
+        static std::array<ForwardRenderer::LightUniformLocations, MAX_LIGHTS> m_lightUniforms;
 
         static Shader m_forwardLitShader;
         static Shader m_alphaDiscardShader;

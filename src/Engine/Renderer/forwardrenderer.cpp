@@ -4,7 +4,6 @@
 #include <cstdio> // for snprintf
 
 #define SIMPLE_SKY
-#define MAX_LIGHTS 8
 
 void Draw3DBillboardRec(const Camera &camera, const Texture2D &texture, const Rectangle &source,
                         const Vector3 &position, const Vector2 &size, const Color &tint)
@@ -60,7 +59,7 @@ namespace BloxEngine
 
     int ForwardRenderer::m_lightCount = 0;
 
-    static std::array<ForwardRenderer::LightUniformLocations, MAX_LIGHTS> g_lightUniforms;
+    std::array<ForwardRenderer::LightUniformLocations, MAX_LIGHTS> ForwardRenderer::m_lightUniforms;
 
     // Shader locations for dynamic sky
     int ForwardRenderer::loc_sunDir = -1;
@@ -94,28 +93,27 @@ namespace BloxEngine
 
     void ForwardRenderer::InitializeLitShaderLocations()
     {
-        const char *props[6] = {"enabled", "type", "position", "direction", "target", "color"};
         char nameBuffer[64];
 
         for (int i = 0; i < MAX_LIGHTS; i++)
         {
             snprintf(nameBuffer, sizeof(nameBuffer), "lights[%d].enabled", i);
-            g_lightUniforms[i].enabled = GetShaderLocation(m_forwardLitShader, nameBuffer);
+            m_lightUniforms[i].enabled = GetShaderLocation(m_forwardLitShader, nameBuffer);
 
             snprintf(nameBuffer, sizeof(nameBuffer), "lights[%d].type", i);
-            g_lightUniforms[i].type = GetShaderLocation(m_forwardLitShader, nameBuffer);
+            m_lightUniforms[i].type = GetShaderLocation(m_forwardLitShader, nameBuffer);
 
             snprintf(nameBuffer, sizeof(nameBuffer), "lights[%d].position", i);
-            g_lightUniforms[i].position = GetShaderLocation(m_forwardLitShader, nameBuffer);
+            m_lightUniforms[i].position = GetShaderLocation(m_forwardLitShader, nameBuffer);
 
             snprintf(nameBuffer, sizeof(nameBuffer), "lights[%d].direction", i);
-            g_lightUniforms[i].direction = GetShaderLocation(m_forwardLitShader, nameBuffer);
+            m_lightUniforms[i].direction = GetShaderLocation(m_forwardLitShader, nameBuffer);
 
             snprintf(nameBuffer, sizeof(nameBuffer), "lights[%d].target", i);
-            g_lightUniforms[i].target = GetShaderLocation(m_forwardLitShader, nameBuffer);
+            m_lightUniforms[i].target = GetShaderLocation(m_forwardLitShader, nameBuffer);
 
             snprintf(nameBuffer, sizeof(nameBuffer), "lights[%d].color", i);
-            g_lightUniforms[i].color = GetShaderLocation(m_forwardLitShader, nameBuffer);
+            m_lightUniforms[i].color = GetShaderLocation(m_forwardLitShader, nameBuffer);
         }
     }
 
@@ -134,7 +132,7 @@ namespace BloxEngine
         loc_exposure = GetShaderLocation(m_dynamicSkyShader, "u_exposure");
         loc_sunSize = GetShaderLocation(m_dynamicSkyShader, "u_sunSize");
         loc_groundAlbedo = GetShaderLocation(m_dynamicSkyShader, "u_groundAlbedo");
-#endif
+#else
 
         m_skyboxShader = LoadShader(
             "resources/engine_shaders/skybox.vs",
@@ -162,6 +160,7 @@ namespace BloxEngine
             SHADER_UNIFORM_INT);
 
         m_skyboxMesh.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(LoadImage("resources/engine_textures/def_sky.png"), CUBEMAP_LAYOUT_AUTO_DETECT);
+#endif
     }
 
     void ForwardRenderer::Shutdown()
@@ -205,7 +204,7 @@ namespace BloxEngine
 
     void ForwardRenderer::UpdateLightShader(int index, const Vector3 &position, const Vector3 &direction, const LightComponent &light)
     {
-        LightUniformLocations &loc = g_lightUniforms[index];
+        LightUniformLocations &loc = m_lightUniforms[index];
 
         int enabled = 1;
         int typeInt = static_cast<int>(light.type);
