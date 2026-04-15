@@ -2,12 +2,14 @@
 #define EDITOR_HPP
 #pragma once
 
-#include <EditorUI/EditorMenuBar.h> // Seperate from the engine
 #include <Application/gameinstance.h>
 #include <Application/instanceprops.h>
 #include <EditorUI/EditorViewportPanel.h>
 #include <EditorUI/SceneHierarchyPanel.h>
 #include <editorcamera.h>
+
+#include "EditorUI/EditorMenuBar.h" // Seperate from the engine
+#include "editorproject.h"
 
 #include <imgui.h>
 #include <raylib-cpp.hpp>
@@ -32,6 +34,8 @@ public:
 private:
   // Editor camera provided by the engine
   BloxEngine::EditorCamera m_editorCamera;
+  
+  EditorProject currentProject;
 
   // Panels
   std::shared_ptr<BloxEngine::EditorUI::SceneHierarchyPanel>

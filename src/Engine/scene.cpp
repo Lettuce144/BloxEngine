@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <iostream>
+#include <toml++/impl/array.hpp>
 
 #define GIZMO_SPRITE_SIZE 1.0f
 
@@ -83,8 +84,8 @@ namespace BloxEngine
             transform.EulerToAxisAngle(transform.rotation, axis, angle);
 
             SetShaderValue(ForwardRenderer::GetForwardLitShader(),
-                           ForwardRenderer::GetForwardLitShader().locs[SHADER_LOC_VECTOR_VIEW],
-                           &currentCamera.position, SHADER_UNIFORM_VEC3);
+                    ForwardRenderer::GetForwardLitShader().locs[SHADER_LOC_VECTOR_VIEW],
+                    &currentCamera.position, SHADER_UNIFORM_VEC3);
 
             BeginShaderMode(ForwardRenderer::GetForwardLitShader());
             {
@@ -125,7 +126,53 @@ namespace BloxEngine
     // Load the scene from a file
     void SceneSerializer::Deserialize(toml::table &parsedToml)
     {
-        // printf("%s", parsedToml["Scene"].value_or("No scene data found").c_str());
-        std::cout << parsedToml["scene"]["name"].value_or("No scene data found") << std::endl;
+        /* if(toml::array* entities = parsedToml["entities"].as_array()) */
+        /* { */
+        /*     entities->for_each([] (auto&& element) { */
+        /*             if(auto entity = element.as_table()) */
+        /*             { */
+        /*             } */
+        /*             }); */
+
+        /* std::cout << parsedToml["scene"]["name"].value_or("No scene data found") << std::endl; */
+        /* } */
+
+        if (auto entities = parsedToml["entities"].as_array())
+        {
+            for (auto&& elem : *entities)
+            {
+                if (auto ent = elem.as_table())
+                {
+                    // Access fields
+                    int id = ent->get("id")->value_or(0);
+                    std::string name = ent->get("name")->value_or("");
+
+                    std::cout << "Entity ID: " << id << "\n";
+                    std::cout << "Name: " << name << "\n";
+
+                    // Components array
+                    if (auto comps = ent->get("components")->as_array())
+                    {
+                        for (auto&& comp_elem : *comps)
+                        {
+                            if (auto comp = comp_elem.as_table())
+                            {
+                                std::string type = comp->get("type")->value_or("");
+
+                                std::cout << "  Component: " << type << "\n";
+
+                                if (type == "model")
+                                {
+                                    std::string model = comp->get("model")->value_or("");
+                                    std::cout << "    Model: " << model << "\n";
+                                }
+                            }
+                        }
+                    }
+
+                    std::cout << "-----------------\n";
+                }
+            }
+        }
     }
 }

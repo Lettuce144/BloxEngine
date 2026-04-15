@@ -25,7 +25,7 @@ void Editor::OnAttach()
   rlImGuiBeginInitImGui();
   {
     ImGuiIO &io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable docking
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable | ImGuiConfigFlags_DpiEnableScaleViewports; // Enable docking
     io.Fonts->AddFontFromFileTTF(
         "resources/fonts/Roboto-Medium.ttf",
         16.0f); // TODO: Fix loading fonts, currently look rugged and ugly

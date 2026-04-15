@@ -86,7 +86,8 @@ namespace BloxEngine
         m_forwardLitShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(m_forwardLitShader, "viewPos");
 
         int ambientLoc = GetShaderLocation(m_forwardLitShader, "ambient");
-        SetShaderValue(m_forwardLitShader, ambientLoc, (float[4]){0.1f, 0.1f, 0.1f, 1.0f}, SHADER_UNIFORM_VEC4);
+        float ambient[4] = {0.1f, 0.1f, 0.1f, 1.0f};
+        SetShaderValue(m_forwardLitShader, ambientLoc, ambient, SHADER_UNIFORM_VEC4);
 
         m_alphaDiscardShader = LoadShader(NULL, "resources/engine_shaders/alpha_discard.fs");
     }
@@ -141,22 +142,27 @@ namespace BloxEngine
         m_skyboxMesh = LoadModelFromMesh(GenMeshCube(1.0f, 1.0f, 1.0f));
         m_skyboxMesh.materials[0].shader = m_skyboxShader;
 
+        int defaultValue; // Otherwise gcc will complain ahhhh
+        defaultValue = MATERIAL_MAP_CUBEMAP;
+
         SetShaderValue(
             m_skyboxMesh.materials[0].shader,
             GetShaderLocation(m_skyboxMesh.materials[0].shader, "environmentMap"),
-            (int[1]){MATERIAL_MAP_CUBEMAP},
+            &defaultValue,
             SHADER_UNIFORM_INT);
+
+        defaultValue = 0;
 
         SetShaderValue(
             m_skyboxMesh.materials[0].shader,
             GetShaderLocation(m_skyboxMesh.materials[0].shader, "doGamma"),
-            (int[1]){0},
+            &defaultValue,
             SHADER_UNIFORM_INT);
 
         SetShaderValue(
             m_skyboxMesh.materials[0].shader,
             GetShaderLocation(m_skyboxMesh.materials[0].shader, "vflipped"),
-            (int[1]){0},
+            &defaultValue,
             SHADER_UNIFORM_INT);
 
         m_skyboxMesh.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(LoadImage("resources/engine_textures/def_sky.png"), CUBEMAP_LAYOUT_AUTO_DETECT);
