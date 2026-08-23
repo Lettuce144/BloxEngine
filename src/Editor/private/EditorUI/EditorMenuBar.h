@@ -7,7 +7,7 @@
 
 class Editor;
 
-class EditorMenuBar : public BloxEngine::EditorUI::EditorElement {
+class EditorMenuBar {
 public:
   EditorMenuBar(Editor &editor) : m_pEditor(editor) {}
 
@@ -18,10 +18,12 @@ public:
   // EditorMenuBar() = default;
   ~EditorMenuBar() = default;
 
-  void DrawElement() const override;
+  void DrawElement();
+
+  void DrawPopUp();
 
 private:
-  // std::shared_ptr<Editor> m_pEditor;
+  bool m_ShowNewProjectPopup = false;
   Editor &m_pEditor; // HACK: I'd like to use a shared pointer but that would require
                           //  Me rewriting the entrypoint and the gameinstance to use a shared pointer
                           //  However, a raw pointer is simple since deleting the instance happens when the entrypoint returns

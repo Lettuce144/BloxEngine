@@ -24,6 +24,7 @@ namespace BloxEngine
 		~Scene();
 
 		void RenderEditorScene(Camera3D &currentCamera);
+		// void RenderScene(Camera3D &currentCamera);
 
 		BaseEntity CreateEntity(const std::string &name);
 		void DestroyEntity(BaseEntity entity);

@@ -12,12 +12,13 @@ namespace BloxEngine
 {
     GameInstance::GameInstance(const InstanceProperties &props)
     {
-
+        // Create a window
         m_ptrWindow = std::make_unique<raylib::Window>(
-                props.width, props.height, props.appName,
-                FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE |
+            props.width, props.height, props.appName,
+            FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE |
                 FLAG_WINDOW_HIGHDPI);
-        // m_ptrWindow->SetTargetFPS(144);
+
+        // Create a new scene
         m_ptrActiveScene = std::make_shared<BloxEngine::Scene>();
 
         SetExitKey(KEY_NULL);
@@ -41,7 +42,11 @@ namespace BloxEngine
         vfs->AddFileSystem("/resources", std::move(m_ptrResourcesFS));
 
         // TODO: This should only be used on projects that compiled with the EDITOR_INSTANCE flag
+        // #ifndef EDITOR_INSTANCE
         vfs->AddFileSystem("/projects", std::move(m_ptrProjectsFS));
+        // #endif
+
+        // TODO: Register the components here
 
         // --------------------------------------------------
         // Game specific code
@@ -62,19 +67,14 @@ namespace BloxEngine
 
         auto sunlight = m_ptrActiveScene->CreateEntity("Directional light");
         sunlight.AddComponent<BloxEngine::LightComponent>(
-                Color{255, 251, 182, 255}, BloxEngine::LightComponent::LightType::Directional);
+            Color{255, 251, 182, 255}, BloxEngine::LightComponent::LightType::Directional);
         sunlight.GetComponent<BloxEngine::TransformComponent>().translation = {0.0f, 4.0f, 0.0f};
         sunlight.GetComponent<BloxEngine::TransformComponent>().rotation = {45.0f, 45.0f, 90.0f};
 
         auto light = m_ptrActiveScene->CreateEntity("Simple point light");
         light.AddComponent<BloxEngine::LightComponent>(
-                RED, BloxEngine::LightComponent::LightType::Point);
+            RED, BloxEngine::LightComponent::LightType::Point);
         light.GetComponent<BloxEngine::TransformComponent>().translation = {0.0f, 4.0f, 0.0f};
-
-        // // Set the material for the block
-        // raylib::Texture2D albedoModel = LoadTexture("assets/radio_albedo.png");
-        // block.AddComponent<BloxEngine::ModelMaterialComponent>().SetMaterial(
-        //     block, MATERIAL_MAP_DIFFUSE, albedoModel);
     }
 
     void GameInstance::Run()
@@ -88,30 +88,22 @@ namespace BloxEngine
     void GameInstance::OpenScene(const std::string &path)
     {
         // TODO: Check if the scene is already open
-        // TODO: Implement OnSceneClose
-        printf("Opening scene: %s", &path);
+        // TODO: Rewrite for fixing virtual file path support
+        printf("Opening scene: %s\n", path.c_str());
 
-        if (auto scenefile = vfs->OpenFile(vfspp::FileInfo(path), vfspp::IFile::FileMode::Read))
+        SceneSerializer serializer(m_ptrActiveScene);
+        try
         {
-            if (scenefile->IsOpened())
-            {
-                SceneSerializer serializer(m_ptrActiveScene);
-                /* SceneSerializer serializer; */
-
-                std::stringstream scenedata;
-                scenefile->Read<std::stringstream>(scenedata);
-
-                try
-                {
-                    toml::table parsedToml = toml::parse(scenedata.str());
-                    serializer.Deserialize(parsedToml);
-                }
-                catch (const toml::parse_error &err)
-                {
-                    std::cerr << "Parsing failed: " << err.what() << std::endl;
-                }
-            }
+            // toml::table parsedToml = toml::parse(scenedata.str());
+            toml::table parsedToml = toml::parse_file(path);
+            // if(serializer.Deserialize(parsedToml))
+            serializer.Deserialize(parsedToml);
         }
+        catch (const toml::parse_error &err)
+        {
+            std::cerr << "Parsing failed: " << err.what() << std::endl;
+        }
+
     }
 
 } // namespace BloxEngine

@@ -2,6 +2,7 @@
 #define COMPONENTS_H
 
 // #include <entt/entt.hpp>
+#include "components/reflection.h"
 #include "raylib-cpp.hpp"
 
 /*

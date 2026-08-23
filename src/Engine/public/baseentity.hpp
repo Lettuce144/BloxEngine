@@ -1,5 +1,6 @@
 #ifndef BASEENTITY_HPP
 #define BASEENTITY_HPP
+#include "entt/meta/meta.hpp"
 #pragma once
 
 #include "scene.h"

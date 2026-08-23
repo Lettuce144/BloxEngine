@@ -44,9 +44,9 @@ namespace BloxEngine::EditorUI
                 //         // RendererDebug::DebugFrame(GameInstance *ptr)
                 //     }
                 //     ImGui::EndMenu();
-                if(ImGui::Button("Focus (Esc)"))
+                if (ImGui::Button("Focus (Esc)"))
                 {
-                    m_Focused = !m_Focused; 
+                    m_Focused = !m_Focused;
                 }
                 ImGui::EndMenuBar();
             }
@@ -80,12 +80,13 @@ namespace BloxEngine::EditorUI
 
             // View matrix
             Matrix view = GetCameraMatrix(m_refCamera);
-            const float *viewMatrix = MatrixToFloat(view);
+            float16 viewMatrix = MatrixToFloatV(view);
 
             // Projection matrix
             float aspect = panelSize.x / panelSize.y;
             Matrix projection = MatrixPerspective(DEG2RAD * m_refCamera.fovy, aspect, rlGetCullDistanceNear(), rlGetCullDistanceFar());
-            const float *projectionMatrix = MatrixToFloat(projection);
+
+            float16 projectionMatrix = MatrixToFloatV(projection);
 
             if (m_ptrSceneHierarchyPanel->GetSelectedEntity())
             {
@@ -121,7 +122,7 @@ namespace BloxEngine::EditorUI
                 float transform[16];
                 memcpy(transform, MatrixToFloat(transformMat), sizeof(float) * 16);
 
-                ImGuizmo::Manipulate(viewMatrix, projectionMatrix, currentGizmoOperation, currentGizmoMode, transform);
+                ImGuizmo::Manipulate((const float*)&viewMatrix, (const float*)&projectionMatrix, currentGizmoOperation, currentGizmoMode, transform);
 
                 if (ImGuizmo::IsUsing())
                 {

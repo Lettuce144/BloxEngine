@@ -1,5 +1,6 @@
 #include "Renderer/forwardrenderer.h"
 #include "Renderer/Hosek/ArHosekSkyModel.h"
+#include "raylib.h"
 #include <imgui.h>
 #include <cstdio> // for snprintf
 
@@ -242,6 +243,8 @@ namespace BloxEngine
 
     void ForwardRenderer::RenderSkybox()
     {
+        if(IsModelValid(m_skyboxMesh))
+        {
         // Instead of doing complex calculations we just draw the inside instead
         BeginShaderMode(m_skyboxShader);
         rlDisableDepthMask();
@@ -251,7 +254,9 @@ namespace BloxEngine
 
         rlEnableBackfaceCulling();
         rlEnableDepthMask();
-        EndShaderMode();
+            EndShaderMode();
+        }
+
     }
 
     void ForwardRenderer::RenderDynamicSky(const Camera3D &camera)

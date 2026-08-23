@@ -110,11 +110,6 @@ RLIMGUIAPI void rlImGuiBeginInitImGui(void);
 /// </summary>
 RLIMGUIAPI void rlImGuiEndInitImGui(void);
 
-/// <summary>
-/// Forces the font texture atlas to be recomputed and re-cached
-/// </summary>
-RLIMGUIAPI void rlImGuiReloadFonts(void);
-
 // Advanced Update API
 
 /// <summary>
@@ -193,7 +188,7 @@ bool rlImGuiImageButton(const char* name, const Texture* image);
 /// <param name="image">The texture to draw</param>
 /// <param name="size">The size of the button</param>
 /// <returns>True if the button was clicked</returns>
-RLIMGUIAPI bool rlImGuiImageButtonSize(const char* name, const Texture* image, struct ImVec2 size);
+RLIMGUIAPI bool rlImGuiImageButtonSize(const char* name, const Texture* image, Vector2 size);
 
 #ifdef __cplusplus
 }

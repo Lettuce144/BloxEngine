@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-void EditorMenuBar::DrawElement() const
+void EditorMenuBar::DrawElement()
 {
   if (ImGui::BeginMainMenuBar())
   {
@@ -12,6 +12,7 @@ void EditorMenuBar::DrawElement() const
     {
       if (ImGui::MenuItem("New project", "Ctrl+N"))
       {
+        m_ShowNewProjectPopup = true;
       }
 
       if (ImGui::MenuItem("Open project", "Ctrl+O"))
@@ -79,7 +80,7 @@ void EditorMenuBar::DrawElement() const
 
       if (ImGui::MenuItem("About"))
       {
-        if(ImGui::Begin("About", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        if (ImGui::Begin("About", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
           ImGui::Text("Blox Engine Editor");
           ImGui::Text("Alpha 0.0.1");
@@ -93,4 +94,101 @@ void EditorMenuBar::DrawElement() const
   }
 
   ImGui::EndMainMenuBar();
+
+  DrawPopUp();
+}
+
+void EditorMenuBar::DrawPopUp()
+{
+
+  if (m_ShowNewProjectPopup)
+  {
+    ImGui::OpenPopup("New Project");
+    m_ShowNewProjectPopup = false;
+  }
+
+  ImGui::SetNextWindowSize(ImVec2(500, 0), ImGuiCond_Appearing);
+
+  if (ImGui::BeginPopupModal(
+          "New Project",
+          nullptr,
+          ImGuiWindowFlags_AlwaysAutoResize))
+
+  {
+    static char projectName[256] = "Untitled Project";
+    static char projectPath[512] = "";
+
+    ImGui::Text("Create a new project");
+    ImGui::Separator();
+
+    ImGui::Spacing();
+
+    ImGui::Text("Project Name");
+    ImGui::InputText(
+        "##ProjectName",
+        projectName,
+        IM_ARRAYSIZE(projectName));
+
+    ImGui::Spacing();
+
+    ImGui::Text("Project Location");
+    ImGui::InputText(
+        "##ProjectPath",
+        projectPath,
+        IM_ARRAYSIZE(projectPath));
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::Text("Geometry Type");
+
+    static int geometryType = 0;
+
+    ImGui::RadioButton("2D", &geometryType, 0);
+    ImGui::SameLine();
+
+    ImGui::RadioButton("3D", &geometryType, 1);
+    ImGui::SameLine();
+
+    ImGui::RadioButton("2D + 3D", &geometryType, 2);
+
+    ImGui::Spacing();
+
+    // Optional description
+    switch (geometryType)
+    {
+    case 0:
+      ImGui::TextDisabled("Create a project focused on csg brush based geometry.");
+      break;
+
+    case 1:
+      ImGui::TextDisabled("Create a project focused on mesh based geometry.");
+      break;
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    if (ImGui::Button("Create", ImVec2(120, 0)))
+    {
+      // CreateProject(
+      //     projectName,
+      //     projectPath,
+      //     geometryType
+      // );
+
+      ImGui::CloseCurrentPopup();
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Cancel", ImVec2(120, 0)))
+    {
+      ImGui::CloseCurrentPopup();
+    }
+
+    ImGui::EndPopup();
+  }
 }

@@ -1,7 +1,7 @@
 #include "components/components.h"
 #include "baseentity.hpp"
 
-namespace BloxEngine{
+namespace BloxEngine {
 
     void ModelMaterialComponent::SetMaterial(BaseEntity& entity, const MaterialMapIndex &materialMapIndex, const Texture2D &texture)
     {

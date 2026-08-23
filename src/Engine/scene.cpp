@@ -3,7 +3,12 @@
 
 #include "baseentity.hpp"
 #include "Renderer/forwardrenderer.h"
+#include "entt/core/fwd.hpp"
+#include "entt/meta/meta.hpp"
+#include "entt/meta/resolve.hpp"
+#include "raylib.h"
 
+#include <cstdio>
 #include <memory>
 #include <iostream>
 #include <toml++/impl/array.hpp>
@@ -84,8 +89,8 @@ namespace BloxEngine
             transform.EulerToAxisAngle(transform.rotation, axis, angle);
 
             SetShaderValue(ForwardRenderer::GetForwardLitShader(),
-                    ForwardRenderer::GetForwardLitShader().locs[SHADER_LOC_VECTOR_VIEW],
-                    &currentCamera.position, SHADER_UNIFORM_VEC3);
+                           ForwardRenderer::GetForwardLitShader().locs[SHADER_LOC_VECTOR_VIEW],
+                           &currentCamera.position, SHADER_UNIFORM_VEC3);
 
             BeginShaderMode(ForwardRenderer::GetForwardLitShader());
             {
@@ -126,53 +131,71 @@ namespace BloxEngine
     // Load the scene from a file
     void SceneSerializer::Deserialize(toml::table &parsedToml)
     {
-        /* if(toml::array* entities = parsedToml["entities"].as_array()) */
-        /* { */
-        /*     entities->for_each([] (auto&& element) { */
-        /*             if(auto entity = element.as_table()) */
-        /*             { */
-        /*             } */
-        /*             }); */
-
-        /* std::cout << parsedToml["scene"]["name"].value_or("No scene data found") << std::endl; */
-        /* } */
-
         if (auto entities = parsedToml["entities"].as_array())
         {
-            for (auto&& elem : *entities)
+            using namespace entt::literals;
+
+            // If enitiy found make new scene
+            std::shared_ptr<Scene> newScene = std::make_shared<Scene>();
+
+            // m_Scene.reset(n);
+
+            for (auto &&elem : *entities)
             {
+                // If an table
                 if (auto ent = elem.as_table())
                 {
                     // Access fields
-                    int id = ent->get("id")->value_or(0);
+                    // int id = ent->get("id")->value_or(0);
                     std::string name = ent->get("name")->value_or("");
 
-                    std::cout << "Entity ID: " << id << "\n";
-                    std::cout << "Name: " << name << "\n";
+                    // TODO: Set Id here when id system works
+                    BaseEntity newEntity = m_Scene->CreateEntity(name);
 
                     // Components array
                     if (auto comps = ent->get("components")->as_array())
                     {
-                        for (auto&& comp_elem : *comps)
+                        for (auto &&comp_elem : *comps)
                         {
                             if (auto comp = comp_elem.as_table())
                             {
-                                std::string type = comp->get("type")->value_or("");
+                                std::string typeName = comp->get("type")->value_or("");
 
-                                std::cout << "  Component: " << type << "\n";
-
-                                if (type == "model")
+                                if (!typeName.empty())
                                 {
-                                    std::string model = comp->get("model")->value_or("");
-                                    std::cout << "    Model: " << model << "\n";
+                                    auto reflectedId = entt::hashed_string::value(typeName.c_str());
+                                    auto refelctedType = entt::resolve(reflectedId);
+
+                                    entt::meta_any componentInstance = refelctedType.construct();
+
+                                    // Loop over the values in a component
+                                    for (auto &&[key, value] : *comp)
+                                    {
+                                        // Already have it, the component props need to be put under type actually! TODO
+                                        if (key == "type")
+                                            continue;
+
+                                        // Get the reflected member variable by using the toml key
+                                        auto memberId = entt::hashed_string::value(key.data());
+                                        entt::meta_data componentValue = refelctedType.data(memberId);
+
+                                        if (componentValue)
+                                        {
+                                            if (auto val = value.value<unsigned int>())
+                                                componentValue.set(componentInstance, entt::meta_any{*val});
+                                        }
+                                    }
+
+                                    // TODO: We need to add a function to the component registeration basically ent::meta()!
+                                    // This function will add the retrieved componentInstance to the newly created entity above
                                 }
                             }
                         }
                     }
-
-                    std::cout << "-----------------\n";
                 }
             }
+
+            m_Scene = newScene;
         }
     }
 }
